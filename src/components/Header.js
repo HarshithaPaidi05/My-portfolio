@@ -40,18 +40,22 @@ const NavLinks = styled(motion.ul)`
   min-width: 250px;
   z-index: 1000;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  flex-direction: column;
   
   @media (max-width: 768px) {
     position: fixed;
-    top: 100%;
+    top: 80px;
     left: 0;
     right: 0;
     width: 100%;
     border-radius: 0;
     border-left: none;
     border-right: none;
-    border-bottom: none;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
     min-width: auto;
+    padding: 2rem 1rem;
+    gap: 0.5rem;
+    background: rgba(10, 10, 10, 0.99);
   }
 `;
 
@@ -66,17 +70,36 @@ const NavLink = styled(motion.li)`
     padding: 0.75rem 1rem;
     border-radius: 8px;
     white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
     
     &:hover {
       color: #6366f1;
       background: rgba(99, 102, 241, 0.1);
     }
     
+    &:active {
+      background: rgba(99, 102, 241, 0.2);
+      transform: scale(0.98);
+    }
+    
     @media (max-width: 768px) {
-      font-size: 1.1rem;
-      padding: 1rem;
+      font-size: 1.2rem;
+      padding: 1.2rem 1rem;
       text-align: center;
       width: 100%;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      
+      &:hover {
+        background: rgba(99, 102, 241, 0.15);
+      }
+      
+      &:active {
+        background: rgba(99, 102, 241, 0.25);
+        transform: scale(0.95);
+      }
     }
   }
 `;
@@ -88,11 +111,27 @@ const MobileMenuButton = styled(motion.button)`
   color: #ffffff;
   cursor: pointer;
   z-index: 1001;
-  padding: 8px;
+  padding: 12px;
   flex-direction: column;
   justify-content: space-around;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background: rgba(99, 102, 241, 0.1);
+  }
+  
+  &:active {
+    background: rgba(99, 102, 241, 0.2);
+  }
+  
+  @media (max-width: 768px) {
+    width: 44px;
+    height: 44px;
+    padding: 14px;
+  }
 `;
 
 const MenuLine = styled.span`
@@ -161,12 +200,28 @@ const Header = ({ currentSection, setCurrentSection }) => {
       }
     };
 
+    const handleTouchOutside = (event) => {
+      if (isMobileMenuOpen && !event.target.closest('nav')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleTouchOutside);
+    document.addEventListener('keydown', handleEscape);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleTouchOutside);
+      document.removeEventListener('keydown', handleEscape);
     };
   }, [setCurrentSection, isMobileMenuOpen, navItems]);
 
@@ -216,7 +271,13 @@ const Header = ({ currentSection, setCurrentSection }) => {
         
         <MobileMenuButton
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            setIsMobileMenuOpen(!isMobileMenuOpen);
+          }}
           whileTap={{ scale: 0.9 }}
+          aria-label="Toggle mobile menu"
+          aria-expanded={isMobileMenuOpen}
         >
           <MenuLine isOpen={isMobileMenuOpen} />
           <MenuLine isOpen={isMobileMenuOpen} />
